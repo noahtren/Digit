@@ -1,4 +1,5 @@
 import time
+import display
 
 # Stream represents the string that is being read through
 # the object saves the string and the reader's position in
@@ -7,6 +8,7 @@ class Stream:
     def __init__(self, str, index):
         self.string = str.replace(" ", "_")
         self.index = index
+        self.data = display.gen_data(self.string)
     def refresh(self, length):
         segment = self.string[self.index:self.index+length]
         return segment
@@ -34,9 +36,13 @@ class Reader:
         else:
             return 1
 
-s = Stream("the quick brown fox jumps over the lazy dog!", 0)
-r = Reader(0.1, 10, 1)
+s = Stream("the quick brown fox jumps over the lazy dog", 0)
+r = Reader(0.1, 6, 1)
+
+d = display.gen_data(s.string)
+display.disp_data(d)
 
 while 1:
     if r.read(s) == 0:
         break
+
