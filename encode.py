@@ -53,20 +53,20 @@ def encode_string(string):
 
 # 100 microsecond resolution for each value
 # (time in miliseconds * 10) / 4 = epoch length in 100 microsecond increments
-def gen_data(str):
+def gen_data(str, epoch_length):
     unit_array = encode_string(str)
     data = []
     for unit in unit_array:
         for epoch in unit:
             if (epoch == "L"):
-                data = np.append(data, fill(40, 40, math.floor(2500)))
+                data = np.append(data, fill(40, 40, math.floor(epoch_length)))
             elif (epoch == "H"):
-                data = np.append(data, fill(150,150,math.floor(2500)))
+                data = np.append(data, fill(150,150,math.floor(epoch_length)))
             elif (epoch == "LH"):
-                data = np.append(data, fill(40,150,math.floor(2500)))
+                data = np.append(data, fill(40,150,math.floor(epoch_length)))
             elif (epoch == "HL"):
-                data = np.append(data, fill(150,40,math.floor(2500)))
-        data = np.append(data, fill(0, 0, math.floor(2500)))
+                data = np.append(data, fill(150,40,math.floor(epoch_length)))
+        data = np.append(data, fill(0, 0, math.floor(epoch_length)))
     return data
 
 def disp_data(d):

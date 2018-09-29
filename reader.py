@@ -9,7 +9,6 @@ class Stream:
     def __init__(self, str, index):
         self.string = str.replace(" ", "_")
         self.index = index
-        self.data = encode.gen_data(self.string)
     def refresh(self, length):
         segment = self.string[self.index:self.index+length]
         return segment
@@ -43,7 +42,7 @@ class Reader:
         app.setFont(size=32, family="Arial")
         app.setLocation("CENTER") 
         row = app.getRow()
-        for i in range(0, r.length):
+        for i in range(0, self.length):
             app.addLabel(str(i), stream.string[stream.index+i], row, i)
         app.go()
 
