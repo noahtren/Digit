@@ -1,5 +1,6 @@
 import time
 import display
+from appJar import gui
 
 # Stream represents the string that is being read through
 # the object saves the string and the reader's position in
@@ -22,12 +23,13 @@ class Reader:
         self.rate = rate
         self.length = length
         # reading direction is 1 for right, 0 for pause, and -1 for left
-        self.direction = 1
+        self.direction = direction
     def read(self, stream):
         string = stream.refresh(self.length)
         # INSERT CODE HERE FOR WRITING TO DEVICE
         print(string)
         time.sleep(self.rate)
+        self.educate(stream)
         stream.iterate(self.direction)
         # return this if the end of the stream has been reached
         # 1 is a sign to continue, while a 0 says you should stop
@@ -35,8 +37,18 @@ class Reader:
             return 0
         else:
             return 1
+    def educate(self, stream):
+        app = gui("Digit Display")
+        for i in range (1, self.length):
+            app.addLabel(str(i), stream.refresh(self.length)[i-1])
+        app.setFg("black")
+        app.setBg("white")
+        app.setFont(size=32, family="Arial")
+        app.setLocation("CENTER") 
+        app.go()
 
-s = Stream("the quick brown fox jumps over the lazy dog", 0)
+
+s = Stream("testing", 0)
 r = Reader(0.1, 6, 1)
 
 d = display.gen_data(s.string)
@@ -45,4 +57,5 @@ display.disp_data(d)
 while 1:
     if r.read(s) == 0:
         break
+r.read(s)
 
