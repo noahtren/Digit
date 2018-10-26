@@ -24,7 +24,7 @@ def setup(pins):
 pins = [14]
 
 # string, beginning index
-s = reader.Stream("hello_world", 0)
+s = reader.Stream("test", 0)
 
 # speed in seconds, length (number of devices), step iterator -- currently broken just use 1
 r = reader.Reader(2, 1, 1)
