@@ -47,7 +47,7 @@ int main() {
     rate = 1;
     length = 8;
     // Setup variables according to input
-    s.create(input_string, -1);
+    s.create(master_string, -1);
     r.create(rate, length, 1);
 
     update_data();
