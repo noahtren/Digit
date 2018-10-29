@@ -5,7 +5,7 @@ int * string_map;
 char * eight_char;
 char master_string[64];
 // Initialize objects
-Stream s;
+BStream s;
 Reader r;
 // Input variables
 int length;
@@ -14,7 +14,7 @@ int rate;
 void update_data() {
     // Iterate the message stream, break it into 8 characters
     // Convert these characters into finger_data
-    if (r.read(s)) {
+    if (r.read_s(s)) {
     // Convert input string into data
     eight_char = s.get_seg(length);
     string_map = encode_string(eight_char);
