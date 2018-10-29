@@ -5,16 +5,20 @@ class Stream {
     public:
         string msg;
         int index;
-        void create(string, int);
-        string get_seg(int);
+        void create(char [64], int);
+        char * get_seg(int);
         void iterate(int);
 };
-void Stream::create(string m, int i) {
+void Stream::create(char m[64], int i) {
     msg = m;
     index = i;
 }
-string Stream::get_seg(int length) {
-    string segment = msg.substr(index, length);
+char * Stream::get_seg(int length) {
+    static char segment[8];
+    for (int i = 0;i<length;i++) {
+        cout << msg[index + i];
+        segment[index+i] = msg[index+i];
+    }
     return segment;
 }
 void Stream::iterate(int d) {
@@ -33,7 +37,6 @@ void Reader::create(int r, int l, int d) {
     direction = d;
 }
 bool Reader::read(Stream& s) {
-    cout << s.get_seg(length);
     s.iterate(direction);
     if ((s.index+length) > s.msg.length()) {
         return false;
