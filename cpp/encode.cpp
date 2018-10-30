@@ -1,65 +1,27 @@
-#include <string>
-#include <iostream>
-using namespace std;
-char code_epochs[][3] = {
-    {'F', 'L', 'L'}, // H high
-    {'F', 'F', 'L'}, // L low
-    {'H', 'L','L'}, // R rising
-    {'H', 'R', 'L'}, // F falling
-    {'F', 'R', 'L'},
-    {'H', 'F', 'L'},
-    {'H', 'H', 'L'},
-    {'F', 'H', 'L'},
-    {'R', 'F', 'L'},
-    {'H', 'H', 'L'},
-    {'F', 'L', 'F'},
-    {'F', 'F', 'F'},
-    {'H', 'L','F'},
-    {'H', 'R', 'F'},
-    {'F', 'R', 'F'},
-    {'H', 'F', 'F'},
-    {'H', 'H', 'F'},
-    {'F', 'H', 'F'},
-    {'R', 'F', 'F'},
-    {'R', 'H', 'F'},
-    {'R', 'L', 'H'},
-    {'F', 'F', 'H'},
-    {'R', 'H', 'R'},
-    {'H', 'L', 'H'},
-    {'H', 'R', 'H'},
-    {'F', 'R', 'H'},
-    {'L', 'L', 'L'}
-};
+int code_epochs[] = {32, 40, 48, 52, 36, 56, 60, 44, 24, 60, 34, 42, 50,
+54, 38, 58, 62, 46, 26, 30, 17, 41, 31, 49, 53, 37, 0};
 char code_map[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '_', '~'};
 
-int * fill_data(char epoch) {
-    static int to_return[125];
-    if (epoch == 'H') {
-        for (int i=0;i<125;i++) {
+int * fill_data(int epoch) {
+    static int to_return[20];
+    for (int i = 0; i < 20; i++) {
+        if (epoch == 3) {
             to_return[i] = 150;
-        }
-    } else if (epoch == 'L') {
-        for (int i=0;i<125;i++) {
+        } else if (epoch == 0) {
             to_return[i] = 40;
+        } else if (epoch == 2) {
+            to_return[i] = 150 - (110*i/20);
+        } else {
+            to_return[i] = 40 + (110*i/20);
         }
-    } else if (epoch == 'R') {
-        for (int i=0; i<125; i++) {
-            to_return[i] = 40 + (110*i/125);
-        }
-    } else {
-        for (int i=0; i<125; i++) {
-            to_return[i] = 150 - (110*i/125);
-
-        }
-    }
-    return to_return;
+     } return to_return;
 }
 
-int get_index(char * arr, char to_find) {
+int get_index(char to_find) {
     int i = 0, index = -1;
-    while (arr[i] != '~') {
-        if (arr[i] == to_find) {
+    while (code_map[i] != '~') {
+        if (code_map[i] == to_find) {
             index = i;
         }
         i++;
@@ -70,19 +32,20 @@ int get_index(char * arr, char to_find) {
 int * encode_string(char * str) {
     static int arr[8];
     for (int i=0;i<8;i++) {
-        arr[i] = get_index(code_map, str[i]);
+        arr[i] = get_index(str[i]);
     }
     return arr;
 }
 
 int * gen_data(int cell_index) {
-    static int data[500]; // Hz can update 500 times per second, 2ms resolution
-    // each epoch will be 125 data points long, or max .25 seconds
+    static int data[100];
     int * to_fill;
+    int epochs[] = {code_epochs[cell_index] / 16, (code_epochs[cell_index] - (code_epochs[cell_index] / 16) * 16)/4,
+    (code_epochs[cell_index] - (code_epochs[cell_index] / 16) * 16 - ((code_epochs[cell_index] - (code_epochs[cell_index] / 16) * 16)/4) * 4)};
     for (int j=0; j<3; j++) {
-        to_fill = fill_data(code_epochs[cell_index][j]);
-        for (int k=j*125; k<(j+1)*125;k++) {
-            data[k] = to_fill[k%125];
+        to_fill = fill_data(epochs[j]);
+        for (int k=j*20; k<(j+1)*20;k++) {
+            data[k] = to_fill[k%20];
         }
     }
     return data;
