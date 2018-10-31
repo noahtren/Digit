@@ -24,8 +24,9 @@ void BStream::iterate(int d) {
 }
  
 class Reader {
-    int r_rate, r_length, r_direction;
+    int r_length, r_direction;
     public:
+        int r_rate;
         void create(int, int, int);
         bool read_s(BStream&);
 };
@@ -98,6 +99,7 @@ byte * gen_data(int cell_index) {
 
 byte * string_map;
 char * eight_char;
+// Input variables
 int len;
 int rate;
 
@@ -116,6 +118,13 @@ void update_data(byte finger_data[8][80], Reader r, BStream s) {
     }
 }
 
+void write_to_pins(byte finger_data[8][80], Reader r) {
+  for (int i = 0; i<80; i++) {
+    analogWrite(A1, finger_data[0][i]);
+    delay((r.r_rate*1000)/80); // one UOM is 80 iterations
+  }
+}
+
 void setup() {
     BStream s;
     Reader r;
@@ -131,16 +140,27 @@ void setup() {
                              'h', 'e', 'l', 'l', 'o', '_', '_', '_'};
     rate = 1;
     len = 8;
+    // Setup variables according to input
     s.create(input_string, -1);
-    r.create(rate, len, 1);
-    update_data(finger_data, r, s);
-    for (int i = 0; i < 80; i++) {
-        Serial.print(finger_data[0][i]);
-        Serial.print(", ");
-        if ((i+1)%20 == 0) {
-            Serial.print("\n");
-        }
+    r.create(rate, len, 8);
+    while (true) {
+      update_data(finger_data, r, s);
+      Serial.print("Data updated!");
+      Serial.print("\n");
+      // Display the data
+      for (byte j=0;j<8;j++) {
+        for (int i = 0; i < 80; i++) {
+          Serial.print(finger_data[j][i]);
+          Serial.print(", ");
+          if ((i+1)%20 == 0) {
+              Serial.print("\n");
+          }
+      }
+      Serial.print("===========================");
+      Serial.print("\n");
     }
+    }
+    write_to_pins(finger_data, r);
 }
 
 void loop() {
