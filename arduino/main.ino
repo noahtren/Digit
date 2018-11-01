@@ -49,18 +49,32 @@ int code_epochs[] = {32, 40, 48, 52, 36, 56, 60, 44, 24, 60, 34, 42, 50,
 char code_map[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '_', '~'};
 
-byte * fill_data(byte epoch) {
+byte * fill_data(byte epoch) { // FUNCTION TO MANIPULATE FOR DIFFERENT INPUT PERCEPTIONS
     static byte to_return[20];
     for (byte i = 0; i < 20; i++) {
-        if (epoch == 3) {
-            to_return[i] = 150;
-        } else if (epoch == 0) {
-            to_return[i] = 40;
-        } else if (epoch == 2) {
-            to_return[i] = 150 - (110*i/20);
-        } else {
-            to_return[i] = 40 + (110*i/20);
+      if (i<7) { // less than 7
+        if (epoch == 3) { // high high
+            to_return[i] = 255;
+        } else if (epoch == 0) { // low low
+            to_return[i] = 0;
+        } else if (epoch == 2) { // high low
+            to_return[i] = 255;
+        } else { // low high
+            to_return[i] = 0;
         }
+      } else if (i < 13) { // less than 13 {
+        to_return[i] = 0;
+      } else { // 4 or greater
+        if (epoch == 3) { // high high
+            to_return[i] = 255;
+        } else if (epoch == 0) { // low low
+            to_return[i] = 0;
+        } else if (epoch == 2) { // high low
+            to_return[i] = 0;
+        } else { // low high
+            to_return[i] = 255;
+        }
+      }
      } return to_return;
 }
 
@@ -119,9 +133,15 @@ void update_data(byte finger_data[8][80], Reader r, BStream s) {
 }
 
 void write_to_pins(byte finger_data[8][80], Reader r) {
-  for (int i = 0; i<80; i++) {
-    analogWrite(A1, finger_data[0][i]);
-    delay((r.r_rate*1000)/80); // one UOM is 80 iterations
+  for (int i = 0; i<20; i++) {
+    Serial.print((finger_data[0][i]));
+    Serial.print("\n");
+    analogWrite(A0, (finger_data[0][i]));
+    Serial.print("waiting for this many miliseconds");
+    Serial.print((r.r_rate*1000)/20);
+    delay(r.r_rate*100); // one UOM is 80 iterations
+    analogWrite(A0, 0);
+    delay(r.r_rate*1000/20); // 1s / 20
   }
 }
 
@@ -143,24 +163,14 @@ void setup() {
     // Setup variables according to input
     s.create(input_string, -1);
     r.create(rate, len, 8);
-    while (true) {
-      update_data(finger_data, r, s);
-      Serial.print("Data updated!");
-      Serial.print("\n");
-      // Display the data
-      for (byte j=0;j<8;j++) {
-        for (int i = 0; i < 80; i++) {
-          Serial.print(finger_data[j][i]);
-          Serial.print(", ");
-          if ((i+1)%20 == 0) {
-              Serial.print("\n");
-          }
-      }
-      Serial.print("===========================");
-      Serial.print("\n");
+    update_data(finger_data, r, s);
+    for (int i = 0; i < 80; i++) {
+      Serial.print(finger_data[0][i]);
     }
-    }
+    Serial.print("Data updated!");
+    Serial.print("\n");
     write_to_pins(finger_data, r);
+    analogWrite(A0, 40);
 }
 
 void loop() {
