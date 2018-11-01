@@ -6,15 +6,29 @@ char code_map[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', '
 int * fill_data(int epoch) {
     static int to_return[20];
     for (int i = 0; i < 20; i++) {
-        if (epoch == 3) {
-            to_return[i] = 150;
-        } else if (epoch == 0) {
-            to_return[i] = 40;
-        } else if (epoch == 2) {
-            to_return[i] = 150 - (110*i/20);
-        } else {
-            to_return[i] = 40 + (110*i/20);
+      if (i<7) { // less than 7
+        if (epoch == 3) { // high high
+            to_return[i] = 255;
+        } else if (epoch == 0) { // low low
+            to_return[i] = 0;
+        } else if (epoch == 2) { // high low
+            to_return[i] = 255;
+        } else { // low high
+            to_return[i] = 0;
         }
+      } else if (i < 13) { // less than 13 {
+        to_return[i] = 0;
+      } else { // 4 or greater
+        if (epoch == 3) { // high high
+            to_return[i] = 255;
+        } else if (epoch == 0) { // low low
+            to_return[i] = 0;
+        } else if (epoch == 2) { // high low
+            to_return[i] = 0;
+        } else { // low high
+            to_return[i] = 255;
+        }
+      }
      } return to_return;
 }
 
