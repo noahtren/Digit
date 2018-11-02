@@ -45,7 +45,7 @@ bool Reader::read_s(BStream& s) {
 }
  
 int code_epochs[] = {32, 40, 48, 52, 36, 56, 60, 44, 24, 60, 34, 42, 50,
-54, 38, 58, 62, 46, 26, 30, 17, 41, 31, 49, 53, 37, 0};
+54, 38, 58, 62, 46, 26, 30, 17, 41, 31, 49, 53, 37, 0}; // binary representation of braille characters
 char code_map[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '_', '~'};
 
@@ -134,15 +134,14 @@ void update_data(byte finger_data[8][80], Reader r, BStream s) {
 
 void write_to_pins(byte finger_data[8][80], Reader r) {
   for (int i = 0; i<20; i++) {
-    Serial.print((finger_data[0][i]));
-    Serial.print("\n");
     analogWrite(A0, (finger_data[0][i]));
-    Serial.print("waiting for this many miliseconds");
-    Serial.print((r.r_rate*1000)/20);
-    delay(r.r_rate*100); // one UOM is 80 iterations
-    analogWrite(A0, 0);
-    delay(r.r_rate*1000/20); // 1s / 20
+    analogWrite(A1, (finger_data[1][i]));
+    analogWrite(A2, (finger_data[2][i]));
+    delay(r.r_rate*1000); // 1s / 20
   }
+  analogWrite(A0, 0);
+  analogWrite(A1, 0);
+  analogWrite(A2, 0);
 }
 
 void setup() {
@@ -170,7 +169,6 @@ void setup() {
     Serial.print("Data updated!");
     Serial.print("\n");
     write_to_pins(finger_data, r);
-    analogWrite(A0, 40);
 }
 
 void loop() {
