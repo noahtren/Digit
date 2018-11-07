@@ -1,40 +1,33 @@
 #include "reader.cpp"
-#include "encode.cpp"
+#include "encode.cpp" 
 #include <iostream>
+#define data_len 60
 using namespace std;
 int * string_map;
 char * eight_char;
 // Input variables
-int len;
 int rate;
 
-void update_data(int finger_data[8][100], Reader r, BStream s) {
-    // Iterate the message stream, break it into 8 characters
-    // Convert these characters into finger_data
+void update_data(int finger_data[8][data_len], Reader r, BStream s) {
     if (r.read_s(s)) {
-    // Convert input string into data
-    eight_char = s.get_seg(len);
+    eight_char = s.get_seg();
     string_map = encode_string(eight_char);
-    // Create the data
     for (int i = 0; i < 8; i++) {
         int * tmp = gen_data(string_map[i]);
-        for (int j = 0; j < 100; j++) {
+        for (int j = 0; j < data_len; j++) {
             finger_data[i][j] = tmp[j];
         }
     }
     } else {
-        cout << "we have reached the end of the msg";
+        cout << "we have reached the end of the msg" << endl;
     }
-
 }
 
 int main() {
-    // Initialize objects
     BStream s;
     Reader r;
-    int finger_data[8][100];
-    // Take input from bluetooth signal
-    char input_string[64] = {'h', 'e', 'l', 'l', 'o', '_', '_', '_',
+    int finger_data[8][data_len];
+    char input_string[64] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
                              'h', 'e', 'l', 'l', 'o', '_', '_', '_',
                              'h', 'e', 'l', 'l', 'o', '_', '_', '_',
                              'h', 'e', 'l', 'l', 'o', '_', '_', '_',
@@ -43,18 +36,18 @@ int main() {
                              'h', 'e', 'l', 'l', 'o', '_', '_', '_',
                              'h', 'e', 'l', 'l', 'o', '_', '_', '_'};
     rate = 1;
-    len = 8;
     // Setup variables according to input
-    s.create(input_string, -1);
-    r.create(rate, len, 1);
-
+    s.create(input_string, -8);
+    r.create(rate, 8);
     update_data(finger_data, r, s);
-
-    // Display the data
-    for (int i = 0; i < 100; i++) {
-        cout << finger_data[0][i] << ", ";
-        if ((i+1)%20 == 0) {
-            cout << endl << endl;
+    for (int h = 0; h < 8; h++) {
+        cout << "Displaying the letter: " << s.get_seg()[h] << endl;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < (data_len/3)-1; j++) {
+                cout << finger_data[h][j+i*(data_len/3)] << ",";
+            }
+            cout << finger_data[h][(data_len/3)-1+i*(data_len/3)];
+            cout << endl;
         }
     }
 }
