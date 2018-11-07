@@ -1,4 +1,5 @@
 #define data_len 60
+#define parallel_cells 4
 int code_epochs[] = {32, 40, 48, 52, 36, 56, 60, 44, 24, 60, 34, 42, 50,
 54, 38, 58, 62, 46, 26, 30, 17, 41, 31, 49, 53, 37, 0, 1}; // binary representation of braille characters
 char code_map[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
@@ -7,7 +8,7 @@ char code_map[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', '
 int * fill_data(int epoch) { // takes a 2-bit input (0-3) and converts it into a vibration pattern
     static int to_return[data_len/3];
     for (int i = 0; i < data_len/3; i++) {
-      if (i<7) { // less than 7
+      if (i<data_len/9+1) { // less than 7
         if (epoch == 3) { // high high
             to_return[i] = 1;
         } else if (epoch == 0) { // low low
@@ -17,7 +18,7 @@ int * fill_data(int epoch) { // takes a 2-bit input (0-3) and converts it into a
         } else { // low high
             to_return[i] = 0;
         }
-      } else if (i < 13) { // less than 13 {
+      } else if (i < (data_len/9)*2+1) { // less than 13 {
         to_return[i] = 0;
       } else { // 4 or greater
         if (epoch == 3) { // high high
@@ -45,8 +46,8 @@ int get_index(char to_find) {
 }
 
 int * encode_string(char * str) {
-    static int arr[8];
-    for (int i=0;i<8;i++) {
+    static int arr[parallel_cells];
+    for (int i=0;i<parallel_cells;i++) {
         arr[i] = get_index(str[i]);
     }
     return arr;
