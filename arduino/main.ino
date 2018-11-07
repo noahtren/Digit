@@ -1,11 +1,18 @@
 #define data_len 60
+#define parallel_cells 4
+using namespace std;
+int * string_map;
+char * parallel_array;
+// Input variables
+int read_speed;
+
 class BStream { // class representing a text stream that is being fed into the reader class
     public:
         char msg[64];
         int index;
         void create(char [64], int);
         char * get_seg();
-        void iterate(int);
+        void update_index(int);
 };
 void BStream::create(char m[64], int idx) { // initialize
     for (int i=0;i<64;i++) {
@@ -14,34 +21,37 @@ void BStream::create(char m[64], int idx) { // initialize
     index = idx;
 }
 char * BStream::get_seg() { // return a segment of the string according to index and reader length
-    static char segment[8];
-    for (int i = 0;i<8;i++) {
+    static char segment[parallel_cells];
+    for (int i = 0;i<parallel_cells;i++) {
         segment[index+i] = msg[index+i];
     }
     return segment;
 }
-void BStream::iterate(int dir) { // move the index forward according to reader direction
+void BStream::update_index(int dir) { // move the index forward according to reader direction
     index = index + dir;
 }
  
 class Reader { // class that defines the reader for customization with contact points and reading speed
-    int r_direction; // how many at a time, which direction we are reading in
+    int dir; // how many at a time, which direction we are reading in
     public:
-        int r_rate;
+        int rate;
         void create(int, int);
-        bool read_s(BStream&);
+        bool can_read(BStream&);
+        void iterate(BStream&);
 };
 void Reader::create(int r, int d) { // initialize
-    r_rate = r;
-    r_direction = d;
+    rate = r;
+    dir = d;
 }
-bool Reader::read_s(BStream& s) { // the main function
-    s.iterate(r_direction); // first it steps forwards in the reading list
-    if ((s.index+8) > 64) { // note that it must be initialized at -1
+bool Reader::can_read(BStream& s) { // the main function
+    if ((s.index+parallel_cells+dir) > 64) { // note that it must be initialized at -1
         return false;
     } else {
         return true;
     }
+}
+void Reader::iterate(BStream& s) {
+    s.update_index(dir);
 }
  
 int code_epochs[] = {32, 40, 48, 52, 36, 56, 60, 44, 24, 60, 34, 42, 50,
@@ -52,7 +62,7 @@ char code_map[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', '
 int * fill_data(int epoch) { // takes a 2-bit input (0-3) and converts it into a vibration pattern
     static int to_return[data_len/3];
     for (int i = 0; i < data_len/3; i++) {
-      if (i<7) { // less than 7
+      if (i<data_len/9+1) { // less than 7
         if (epoch == 3) { // high high
             to_return[i] = 1;
         } else if (epoch == 0) { // low low
@@ -62,7 +72,7 @@ int * fill_data(int epoch) { // takes a 2-bit input (0-3) and converts it into a
         } else { // low high
             to_return[i] = 0;
         }
-      } else if (i < 13) { // less than 13 {
+      } else if (i < (data_len/9)*2+1) { // less than 13 {
         to_return[i] = 0;
       } else { // 4 or greater
         if (epoch == 3) { // high high
@@ -90,8 +100,8 @@ int get_index(char to_find) {
 }
 
 int * encode_string(char * str) {
-    static int arr[8];
-    for (int i=0;i<8;i++) {
+    static int arr[parallel_cells];
+    for (int i=0;i<parallel_cells;i++) {
         arr[i] = get_index(str[i]);
     }
     return arr;
@@ -111,16 +121,11 @@ int * gen_data(int cell_index) {
     return data;
 }
 
-
-int * string_map;
-char * eight_char;
-// Input variables
-int rate;
-
 void update_data(int finger_data[8][data_len], Reader r, BStream s) {
-    if (r.read_s(s)) {
-    eight_char = s.get_seg();
-    string_map = encode_string(eight_char);
+    if (r.can_read(s)) {
+    r.iterate(s);
+    parallel_array = s.get_seg();
+    string_map = encode_string(parallel_array);
     for (int i = 0; i < 8; i++) {
         int * tmp = gen_data(string_map[i]);
         for (int j = 0; j < data_len; j++) {
@@ -132,21 +137,21 @@ void update_data(int finger_data[8][data_len], Reader r, BStream s) {
     }
 }
 
-void write_to_pins(byte finger_data[8][60], Reader r) {
-  for (int i = 0; i<20; i++) {
-    analogWrite(A0, (finger_data[0][i]));
-    analogWrite(A1, (finger_data[0][i+20]));
-    analogWrite(A2, (finger_data[0][i+40]));
+void write_to_pins(byte finger_data[8][data_len], Reader r) {
+  for (int i = 0; i<(data_len/3); i++) {
+    analogWrite(A0, (finger_data[0][i])*255);
+    analogWrite(A1, (finger_data[0][i+(data_len/3)])*255);
+    analogWrite(A2, (finger_data[0][i+(data_len/3)*2])*255);
     Serial.print("1: ");
     Serial.print(finger_data[0][i]);
     Serial.print("\n");
     Serial.print("2: ");
-    Serial.print(finger_data[0][i+20]);
+    Serial.print(finger_data[0][i+(data_len/3)]);
     Serial.print("\n");
     Serial.print("3: ");
-    Serial.print(finger_data[0][i+40]);
+    Serial.print(finger_data[0][i+(data_len/3)*2]);
     Serial.print("\n");
-    delay(r.r_rate*1000/20); // 1s / 20
+    delay(r.rate*1000/20); // 1s / 20
   }
   analogWrite(A0, 0);
   analogWrite(A1, 0);
@@ -154,7 +159,7 @@ void write_to_pins(byte finger_data[8][60], Reader r) {
 }
 
 void setup() {
-    BStream s;
+   BStream s;
     Reader r;
     int finger_data[8][data_len];
     char input_string[64] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
@@ -165,10 +170,10 @@ void setup() {
                              'h', 'e', 'l', 'l', 'o', '_', '_', '_',
                              'h', 'e', 'l', 'l', 'o', '_', '_', '_',
                              'h', 'e', 'l', 'l', 'o', '_', '_', '_'};
-    rate = 1;
+    read_speed = 1;
     // Setup variables according to input
-    s.create(input_string, -8);
-    r.create(rate, 8);
+    s.create(input_string, parallel_cells*-1);
+    r.create(read_speed, parallel_cells);
     update_data(finger_data, r, s);
     for (int h = 0; h < 8; h++) {
         Serial.print("Displaying the letter: "); Serial.print(s.get_seg()[h]); Serial.print("\n");
