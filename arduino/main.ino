@@ -1,6 +1,6 @@
 #define data_len 60
 #define parallel_cells 8
-byte pins [12] = {4, 3, 2, 8, 5, 6, 8, 9, 10, 11, 12, 13};
+byte pins [12] = {4, 3, 2, 8, 5, 6, 12, 7, 10, 11, 12, 9}; // the first six pins are correct, the rest not so much
 byte * string_map;
 char * parallel_array;
 // Input variables
@@ -146,7 +146,6 @@ void update_data(byte finger_data[8][data_len], Reader r, BStream s) {
 void write_to_pins(byte finger_data[parallel_cells][data_len], Reader r) {
   for (byte i = 0; i<(data_len/3); i++) {
     for (byte pin = 0; pin < 6; pin++) {
-      Serial.print("Writing to pin: "); Serial.print(pins[pin]); Serial.print(" this value: "); Serial.print(finger_data[pin/3][i+(pin%3)*(data_len/3)]); Serial.print("\n");
       digitalWrite(pins[pin], (finger_data[pin/3][i+(pin%3)*(data_len/3)]));
     }
     delay(r.rate*1000/20); // 1s / 20
@@ -172,14 +171,14 @@ void setup() {
   Serial.begin(9600);
     byte finger_data[8][data_len];
     // ##################################################
-    char input_string[64] = {'n', 't', 'c', 'd', 'e', 'f', 'g', 'h',
-                             'h', 'e', 'l', 'l', 'o', '_', '_', '_',
-                             'h', 'e', 'l', 'l', 'o', '_', '_', '_',
-                             'h', 'e', 'l', 'l', 'o', '_', '_', '_',
-                             'h', 'e', 'l', 'l', 'o', '_', '_', '_',
-                             'h', 'e', 'l', 'l', 'o', '_', '_', '_',
-                             'h', 'e', 'l', 'l', 'o', '_', '_', '_',
-                             'h', 'e', 'l', 'l', 'o', '_', '_', '_'};
+    char input_string[64] = {'a', 'n', 't', 's', '_', '_', '_', '_',
+                             '_', '_', '_', '_', '_', '_', '_', '_',
+                             '_', '_', '_', '_', '_', '_', '_', '_',
+                             '_', '_', '_', '_', '_', '_', '_', '_',
+                             '_', '_', '_', '_', '_', '_', '_', '_',
+                             '_', '_', '_', '_', '_', '_', '_', '_',
+                             '_', '_', '_', '_', '_', '_', '_', '_',
+                             '_', '_', '_', '_', '_', '_', '_', '_'};
     read_speed = 0.5;
     
     // Setup variables according to input. THIS IS WHERE USER CUSTOMIZATION COMES INTO PLAY
@@ -187,7 +186,10 @@ void setup() {
     r.create(read_speed, parallel_cells);
     // ##################################################
     update_data(finger_data, r, s);
-    write_to_pins(finger_data, r);
+    for (byte i = 0; i < 100; i++) {
+      write_to_pins(finger_data, r);
+      delay(read_speed*1000);
+    }
 }
 
 void loop() {
