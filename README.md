@@ -15,7 +15,7 @@ A unit of meaning is simply any one character, such as `a`, `z`, `:`, or `1`. Fo
    ## Epochs
  Digit communicates a unit of meaning through 3 sequential pitch modulation epochs, which have 4 variants. The four variants are `LOW`, `HIGH`, `LOW to HIGH`, and `HIGH to LOW`. A `LOW` epoch is 40 Hz, and a `HIGH` epoch is 150 Hz. The shifting epochs bend from pitch to pitch at a constant rate over the duration of the epoch. An epoch length is defined as the length of the unit of meaning divided by 4. This allows for 75% of the unit of meaning to be vibrations, and 25% to be at rest to communicate that the next unit of meaning is coming.
  
- [alt text](http://noahtrenaman.com/media/braille.gif)
+![](media/braille.gif)
  
  ## Required Libraries
  This software uses a few libraries that must be installed in the Raspberry pi. These libraries are `RPi.GPIO`, `matplotlib`, `numpy`, and `math`. These are all on PyPI and can be installed with pip.
