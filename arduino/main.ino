@@ -1,6 +1,6 @@
 #define data_len 60
 #define parallel_cells 8
-byte pins [12] = {4, 3, 2, 8, 5, 6, 12, 7, 10, 11, 12, 9}; // the first six pins are correct, the rest not so much
+byte pins [12] = {4, 3, 2, 8, 5, 6, 12, 7, 10, 11, 12, 9};
 byte * string_map;
 char * parallel_array;
 // Input variables
