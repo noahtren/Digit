@@ -1,31 +1,24 @@
-  This README file is a tl;dr of the full paper, which can be read [here](http://noahtrenaman.com/media/Digit_Paper.pdf). This file is more focused on the specific software used.
+You can read the paper discussing this device [here](http://noahtrenaman.com/media/Digit_Paper.pdf).
   
   # The Digit Glove
-  The Digit Glove is a wearable tactile language encoder based on the Braille language. The purpose of Digit is to allow a dedicated computer-to-human communication channel through the tactile sense. It could be very helpful for the blind population, but it is not limited in this scope as sighted people could gain from it as well (see paper for more details). Braille, being the first system that uses binary encoding (6 bits per character), is capable of efficiently communicating language through the sense of touch. Digit attempts to accomplish much of the same. The chief difference is that Digit is "read" through a set of vibrating devices instead of through elevated dots on a page. 
+  The Digit Glove is a wearable tactile language device based on the Braille language. It is an attempt to design a dedicated computer-to-human communication channel through the tactile sense. The chief difference between this device and Braille is that language is "read" through a set of vibrating devices instead of through elevated dots on a page. 
   
-The code found in the `python` folder can control a Raspberry Pi for a pitch-modulation approach, and the code found in the `cpp` and `arduino` folders are used for an Arduino nano to operate a series of vibration motors to represent Braille through a direct binary approach. It is still up to investigation as to which perceptual methods are most effective.
+The code found in the `python` folder can control a Raspberry Pi for a pitch-modulation approach, and the code found in the `cpp` and `arduino` folders are used for an Arduino nano to operate a series of vibration motors to represent Braille through a binary approach. It is still up to investigation as to which methods are most effective.
  
   ## Unit of Meaning
-A unit of meaning is simply any one character, such as `a`, `z`, `:`, or `1`. For Braille there are 64 possible units of meaning. Braille accomplishes this through 6 bits (raised or flat), which allows for 2^6 permutations. In order to emulate Braille, a tactile system must also be capable of communicating 6 bits per unit of meaning. The pitch-modulation approach accomplishes this through 3 epochs of 4 variants, which allows for 4^3 permutations. 2^6 = 3^4 = 64. The direct binary approach accomplishes this through allowing 6 bits to be communicated by on-off patterns of vibration motors.
-  
-  # Using Digit with a Raspberry Pi
- This repository contains Python code for a raspberry pi to control a series of vibration speakers to communicate a given stream of information. The vibration speaker is controlled directly from any of the Raspberry pi's GPIO pins, meaning that the vibration speaker chosen should have an operating voltage in the area of 3V. The specific pins are assigned in the `pins` array.
- Determine which pins you would like to use and attach each one to the positive contact of a vibration speaker, and connect the negative contact to the ground of the raspberry pi. Calling the `setup()` function from `main.py` should generate a low tone (100Hz) in the assigned pins.
+A unit of meaning is simply any one character, such as `a`, `z`, `:`, or `1`. For Braille there are 64 possible units of meaning. Braille accomplishes this through 6 bits (raised or flat), which allows for 2^6 permutations. In order to emulate Braille, any tactile system must also be capable of communicating 6 bits per unit of meaning. The pitch-modulation approach accomplishes this through 3 epochs of 4 variants, which allows for 4^3 permutations. 2^6 = 3^4 = 64. The direct binary approach accomplishes this through allowing 6 bits to be communicated by on-off patterns of vibration motors.
  
-   ## Epochs
- Digit communicates a unit of meaning through 3 sequential pitch modulation epochs, which have 4 variants. The four variants are `LOW`, `HIGH`, `LOW to HIGH`, and `HIGH to LOW`. A `LOW` epoch is 40 Hz, and a `HIGH` epoch is 150 Hz. The shifting epochs bend from pitch to pitch at a constant rate over the duration of the epoch. An epoch length is defined as the length of the unit of meaning divided by 4. This allows for 75% of the unit of meaning to be vibrations, and 25% to be at rest to communicate that the next unit of meaning is coming.
+   ## Pitch Modulation
+ A unit of meaning is communicated by three sequential pitch modulation epochs, which have four variants. The four variants are `LOW`, `HIGH`, `LOW to HIGH`, and `HIGH to LOW`. A `LOW` epoch is 40 Hz, and a `HIGH` epoch is 150 Hz. The shifting epochs bend from pitch to pitch at a constant rate over the duration of the epoch. An epoch length is defined as the length of the unit of meaning divided by four. This allows for 75% of the unit of meaning to be vibrations, and 25% to be at rest to communicate that the next unit of meaning is coming.
  
 ![Digit Animation](media/braille.gif)
 This gif demonstrates how each epoch represents a row of a Braille cell.
- 
- ## Required Libraries
- This software uses a few libraries that must be installed in the Raspberry pi. These libraries are `RPi.GPIO`, `matplotlib`, `numpy`, and `math`. These are all on PyPI and can be installed with pip.
   
 ## Configuration
 The system is highly configurable, allowing for multiple streams of information to be read, and for customization of the reading experience. This is especially helpful for learning the encoding system.
 
 ## Stream
-A stream object represents a string of information, and the index of the string that the reader is currently at. For example, if one is reading the sentence, `the quick brown fox jumped over the lazy dog`, and they are currently at the letter `b` in `brown`, then `Stream.index = 10`. Individual streams can be read in different ways based on how they interface with a Reader object.
+A stream object represents a string of information, and the current index in the string. For example, if one is reading the sentence, `the quick brown fox jumped over the lazy dog`, and they are currently at the letter `b` in `brown`, then `Stream.index = 10`. Individual streams can be read in different ways based on how they interface with a Reader object.
 
 ## Reader
 The reader can control how many devices they are using, how fast the characters are presented, and which direction to read through text (to allow re-reading). This is done through the `Reader` class, which takes three arguments:
